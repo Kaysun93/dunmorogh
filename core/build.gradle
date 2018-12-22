@@ -1,0 +1,8 @@
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-data-redis")
+    compile("org.springframework.boot:spring-boot-starter-jdbc")
+    runtime("mysql:mysql-connector-java")
+    /*providedCompile(
+            "javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1"
+    )*/
+}

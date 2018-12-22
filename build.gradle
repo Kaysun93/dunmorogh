@@ -1,0 +1,94 @@
+buildscript {
+    ext {
+        springBootVersion = '2.1.1.RELEASE'
+        springCloudVersion = 'Finchley.SR2'
+        ioSpringPlatformBom = 'Cairo-SR6'
+    }
+    repositories {
+        mavenLocal()
+        // 下面是使用私服的方式
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: "idea"
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: "maven-publish"
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    publishing {
+        publications {
+            toPublish(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            maven {
+                name "wizard-repo"
+                url ""
+            }
+        }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "io.spring.platform:platform-bom:${ioSpringPlatformBom}"
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    //gradle默认会解决冲突问题，用当前最高的jar
+    configurations.all {
+        resolutionStrategy {
+            failOnVersionConflict() // 有版本冲突时，直接构建失败
+
+            /* 或者强制指定依赖
+            force 'org.slf4j:slf4j-api:1.7.24' */
+        }
+        //compile.exclude module: 'commons-logging'
+        //all*.exclude module: 'commons-logging'
+    }
+}
+
+subprojects {
+    repositories {
+        mavenLocal()
+        // 下面是使用私服的方式
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
+        mavenCentral()
+    }
+
+    tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+
+    // java编译的时候缺省状态下会因为中文字符而失败
+    [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+    configurations {
+        // 所有需要忽略的包定义在此
+        //all*.exclude group: 'commons-beanutils', module: 'commons-beanutils'
+    }
+
+    // 显示当前项目下所有用于 compile 的 jar.
+    task listJars(description: 'Display all compile jars.') << {
+        configurations.compile.each {
+            File file -> println file.name
+        }
+    }
+}
+
+/* 从子项目拷贝War任务生成的压缩包到根项目的build/explodedDist目录 */
+task explodedDist(type: Copy) {
+    into "$buildDir/explodedDist"
+    subprojects {
+        from tasks.withType(War)
+    }
+}

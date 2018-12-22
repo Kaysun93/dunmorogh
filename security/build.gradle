@@ -1,0 +1,11 @@
+dependencies {
+    compile project(":core")
+    compile("org.springframework.cloud:spring-cloud-starter-oauth2")
+    compile("org.springframework.social:spring-social-config")
+    compile("org.springframework.social:spring-social-core")
+    compile("org.springframework.social:spring-social-security")
+    compile("org.springframework.social:spring-social-web")
+    /*providedCompile(
+            "javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1"
+    )*/
+}
